@@ -51,13 +51,50 @@ func init() {
 
 func main() {
 
-	http.HandleFunc("/", retrieveRecord)
+	http.HandleFunc("/", retrieveHTML)
 	http.HandleFunc("/json", retrieveJSON)
 	http.HandleFunc("/test/", test)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
 	http.ListenAndServe(":80", nil)
 
+}
+
+func queryDB() ([]Web_info, error) {
+	snbs := make([]Web_info, 0)
+	rows, err := db.Query("SELECT * FROM web_info")
+	if err != nil {
+		fmt.Println("Error querying web_info")
+		return snbs, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		snb := Web_info{}
+		err := rows.Scan(
+			&snb.Total_amount,
+			&snb.Apr,
+			&snb.Paid_thru,
+			&snb.Current_balance,
+			&snb.Principal_paid,
+			&snb.Percent_principal_paid,
+			&snb.Interest_saved,
+			&snb.Payment_date,
+			&snb.Payment,
+			&snb.Principal,
+			&snb.Interest,
+			&snb.Balance,
+			&snb.Payment_number,
+			&snb.Percent_principal,
+			&snb.Percent_interest,
+		)
+		if err != nil {
+			log.Println(err)
+			return snbs, err
+		}
+		snbs = append(snbs, snb)
+	}
+	return snbs, nil
 }
 
 func test(w http.ResponseWriter, r *http.Request) {
@@ -70,82 +107,29 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 func retrieveJSON(w http.ResponseWriter, r *http.Request) {
 
-	rows, err := db.Query("SELECT * FROM web_info")
+	recs, err := queryDB()
 	if err != nil {
 		fmt.Println("Error querying web_info")
+		http.Error(w, "Database connection issue", 503)
+		return
 	}
-	defer rows.Close()
-	snbs := make([]Web_info, 0)
 
-	for rows.Next() {
-		snb := Web_info{}
-		err := rows.Scan(
-			&snb.Total_amount,
-			&snb.Apr,
-			&snb.Paid_thru,
-			&snb.Current_balance,
-			&snb.Principal_paid,
-			&snb.Percent_principal_paid,
-			&snb.Interest_saved,
-			&snb.Payment_date,
-			&snb.Payment,
-			&snb.Principal,
-			&snb.Interest,
-			&snb.Balance,
-			&snb.Payment_number,
-			&snb.Percent_principal,
-			&snb.Percent_interest,
-		)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		snbs = append(snbs, snb)
-	}
-	// below works
-	//json.NewEncoder(w).Encode(snbs)
-	//below works with indent
+	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
 	resp := json.NewEncoder(w)
 	resp.SetIndent("", "    ")
-	resp.Encode(snbs)
+	resp.Encode(recs)
 
 }
 
-func retrieveRecord(w http.ResponseWriter, r *http.Request) {
+func retrieveHTML(w http.ResponseWriter, r *http.Request) {
 
-	rows, err := db.Query("SELECT * FROM web_info")
+	recs, err := queryDB()
 	if err != nil {
 		fmt.Println("Error querying web_info")
-	}
-	defer rows.Close()
-	snbs := make([]Web_info, 0)
-
-	for rows.Next() {
-		snb := Web_info{}
-		err := rows.Scan(
-			&snb.Total_amount,
-			&snb.Apr,
-			&snb.Paid_thru,
-			&snb.Current_balance,
-			&snb.Principal_paid,
-			&snb.Percent_principal_paid,
-			&snb.Interest_saved,
-			&snb.Payment_date,
-			&snb.Payment,
-			&snb.Principal,
-			&snb.Interest,
-			&snb.Balance,
-			&snb.Payment_number,
-			&snb.Percent_principal,
-			&snb.Percent_interest,
-		)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		snbs = append(snbs, snb)
+		http.Error(w, "Database connection issue", 503)
+		return
 	}
 	// fmt.Print(snbs[0].Apr)  DEBUG ITEM
 	tmpl := template.Must(template.ParseFiles("layout.html"))
-	tmpl.Execute(w, snbs[0])
+	tmpl.Execute(w, recs[0])
 }
