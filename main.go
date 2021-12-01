@@ -61,6 +61,7 @@ func main() {
 }
 
 func queryDB() ([]Web_info, error) {
+
 	snbs := make([]Web_info, 0)
 	rows, err := db.Query("SELECT * FROM web_info")
 	if err != nil {
@@ -95,6 +96,7 @@ func queryDB() ([]Web_info, error) {
 		snbs = append(snbs, snb)
 	}
 	return snbs, nil
+
 }
 
 func test(w http.ResponseWriter, r *http.Request) {
@@ -103,6 +105,7 @@ func test(w http.ResponseWriter, r *http.Request) {
 		Status: "OK",
 	}
 	json.NewEncoder(w).Encode(jsonResponse)
+
 }
 
 func retrieveJSON(w http.ResponseWriter, r *http.Request) {
@@ -132,4 +135,5 @@ func retrieveHTML(w http.ResponseWriter, r *http.Request) {
 	// fmt.Print(snbs[0].Apr)  DEBUG ITEM
 	tmpl := template.Must(template.ParseFiles("layout.html"))
 	tmpl.Execute(w, recs[0])
+
 }
