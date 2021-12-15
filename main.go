@@ -34,8 +34,10 @@ type Web_info struct {
 	Percent_interest       string
 }
 
-var db *sql.DB
-var err error
+var (
+	db  *sql.DB
+	err error
+)
 
 func init() {
 
