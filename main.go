@@ -128,6 +128,14 @@ func retrieveJSON(w http.ResponseWriter, r *http.Request) {
 
 func retrieveHTML(w http.ResponseWriter, r *http.Request) {
 
+	f := "layout.html"
+	_, err := os.Stat(f)
+	if err != nil {
+		fmt.Println("layout.html not found.")
+		http.Error(w, "HTML template issue", 503)
+		return
+	}
+
 	recs, err := queryDB()
 	if err != nil {
 		fmt.Println("Error querying web_info")
@@ -135,7 +143,7 @@ func retrieveHTML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fmt.Print(snbs[0].Apr)  DEBUG ITEM
-	tmpl := template.Must(template.ParseFiles("layout.html"))
+	tmpl := template.Must(template.ParseFiles(f))
 	tmpl.Execute(w, recs[0])
 
 }
