@@ -36,22 +36,27 @@ func procUboo(body string) {
 	fmt.Printf("%+v", w)
 }
 
-func getUboo() {
+func getUboo() string {
+
 	resp, err := http.Get("http://uboo.supskifun.net/json")
 	if err != nil {
 		print(err)
 	}
+
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		print(err)
 	}
 
-	procUboo(string(body))
+	return (string(body))
+
 }
 
 func main() {
 
-	getUboo()
+	info := getUboo()
+	procUboo(info)
 
 }
