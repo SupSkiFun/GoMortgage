@@ -35,8 +35,8 @@ type Web_info struct {
 }
 
 var (
-	db  *sql.DB
-	err error
+	db *sql.DB
+	//err error  Maybe use for init() sql.Open Statement?  Or just declare in init()?
 )
 
 func init() {
@@ -47,7 +47,7 @@ func init() {
 	dbt := os.Getenv("DB_TYPE")
 	dbu := os.Getenv("DB_USER")
 	connStr := dbt + "://" + dbu + ":" + dbp + "@" + dbh + "/" + dbn + "?sslmode=disable"
-	db, err = sql.Open("postgres", connStr)
+	db, _ = sql.Open("postgres", connStr)
 
 }
 
@@ -64,13 +64,14 @@ func main() {
 
 func queryDB() ([]Web_info, error) {
 
-	snbs := make([]Web_info, 0)
 	rows, err := db.Query("SELECT * FROM web_info")
 	if err != nil {
 		fmt.Println("Error querying web_info")
-		return snbs, err
+		return nil, err
 	}
 	defer rows.Close()
+
+	snbs := make([]Web_info, 0)
 
 	for rows.Next() {
 		snb := Web_info{}
@@ -93,10 +94,11 @@ func queryDB() ([]Web_info, error) {
 		)
 		if err != nil {
 			log.Println(err)
-			return snbs, err
+			return nil, err
 		}
 		snbs = append(snbs, snb)
 	}
+
 	return snbs, nil
 
 }
@@ -115,7 +117,7 @@ func retrieveJSON(w http.ResponseWriter, r *http.Request) {
 	recs, err := queryDB()
 	if err != nil {
 		fmt.Println("Error querying web_info")
-		http.Error(w, "Database connection issue", 503)
+		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
 
@@ -132,14 +134,14 @@ func retrieveHTML(w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(f)
 	if err != nil {
 		fmt.Println("layout.html not found.")
-		http.Error(w, "HTML template issue", 503)
+		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
 		return
 	}
 
 	recs, err := queryDB()
 	if err != nil {
 		fmt.Println("Error querying web_info")
-		http.Error(w, "Database connection issue", 503)
+		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
 	// fmt.Print(snbs[0].Apr)  DEBUG ITEM
