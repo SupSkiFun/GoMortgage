@@ -1,0 +1,6 @@
+.vscode/*
+amd64/*
+arm64/*
+*.exe
+RunOnWin/*
+utility/*
