@@ -13,25 +13,25 @@ import (
 )
 
 type JSONResponse struct {
-	Status string `json:"status"`
+	Status string
 }
 
 type Web_info struct {
-	Total_amount           string `json:"total_amount"`
-	Apr                    string `json:"apr"`
-	Paid_thru              string `json:"paid_thru"`
-	Current_balance        string `json:"current_balance"`
-	Principal_paid         string `json:"principal_paid"`
-	Percent_principal_paid string `json:"percent_principal_paid"`
-	Interest_saved         string `json:"interest_saved"`
-	Payment_date           string `json:"payment_date"`
-	Payment                string `json:"payment"`
-	Principal              string `json:"principal"`
-	Interest               string `json:"interest"`
-	Balance                string `json:"balance"`
-	Payment_number         string `json:"payment_number"`
-	Percent_principal      string `json:"percent_principal"`
-	Percent_interest       string `json:"percent_interest"`
+	Total_amount           string
+	Apr                    string
+	Paid_thru              string
+	Current_balance        string
+	Principal_paid         string
+	Percent_principal_paid string
+	Interest_saved         string
+	Payment_date           string
+	Payment                string
+	Principal              string
+	Interest               string
+	Balance                string
+	Payment_number         string
+	Percent_principal      string
+	Percent_interest       string
 }
 
 var (
