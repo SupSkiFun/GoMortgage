@@ -76,16 +76,10 @@ func main() {
 
 }
 
-func queryWEBI() (Web_info, error) {
+func queryWebi() (Web_info, error) {
 
 	snb := Web_info{}
 	row := db.QueryRow("SELECT * FROM web_info")
-	// if err != nil {
-	// 	fmt.Println("Error querying web_info")
-	// 	return nil, err
-	// }
-
-	//defer row.Close()
 
 	if err := row.Scan(
 		&snb.Total_amount,
@@ -112,13 +106,14 @@ func queryWEBI() (Web_info, error) {
 
 }
 
-func queryAMOR() ([]Amortize, error) {
+func queryAmor() ([]Amortize, error) {
 
 	rows, err := db.Query("SELECT * FROM amortize")
 	if err != nil {
 		fmt.Println("Error querying amortize")
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	snbs := make([]Amortize, 0)
@@ -158,7 +153,7 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
-	recs, err := queryWEBI()
+	recs, err := queryWebi()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
@@ -174,7 +169,7 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
 func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
-	recs, err := queryAMOR()
+	recs, err := queryAmor()
 	if err != nil {
 		fmt.Println("Error querying amortize")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
@@ -190,16 +185,15 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
-	f := "layout.html"
+	f := "layoutWebi.html"
 	_, err := os.Stat(f)
 	if err != nil {
-		// fmt.Println("layout.html not found.")
 		fmt.Println(f, "not found.")
 		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
 		return
 	}
 
-	recs, err := queryWEBI()
+	recs, err := queryWebi()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
@@ -213,7 +207,7 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
-	f := "layoutAMOR.html"
+	f := "layoutAmor.html"
 	_, err := os.Stat(f)
 	if err != nil {
 		fmt.Println(f, "not found.")
@@ -221,12 +215,14 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recs, err := queryAMOR()
+	recs, err := queryAmor()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
+
+	// fmt.Printf("%+v", recs)
 
 	tmpl := template.Must(template.ParseFiles(f))
 	tmpl.Execute(w, recs) //recs[0])
