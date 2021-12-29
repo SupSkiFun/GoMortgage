@@ -12,6 +12,18 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type Amortize struct {
+	Payment_date      string `json:"payment_date"`
+	Payment           string `json:"payment"`
+	Principal         string `json:"principal"`
+	Interest          string `json:"interest "`
+	Total_interest    string `json:"total_interest"`
+	Balance           string `json:"balance"`
+	Payment_number    string `json:"payment_number"`
+	Percent_principal string `json:"percent_principal"`
+	Percent_interest  string `json:"percent_interest"`
+}
+
 type JSONResponse struct {
 	Status string `json:"status"`
 }
@@ -32,18 +44,6 @@ type Web_info struct {
 	Payment_number         string `json:"payment_number"`
 	Percent_principal      string `json:"percent_principal"`
 	Percent_interest       string `json:"percent_interest"`
-}
-
-type Amortize struct {
-	Payment_date      string `json:"payment_date"`
-	Payment           string `json:"payment"`
-	Principal         string `json:"principal"`
-	Interest          string `json:"interest "`
-	Total_interest    string `json:"total_interest"`
-	Balance           string `json:"balance"`
-	Payment_number    string `json:"payment_number"`
-	Percent_principal string `json:"percent_principal"`
-	Percent_interest  string `json:"percent_interest"`
 }
 
 var (
@@ -76,94 +76,27 @@ func main() {
 
 }
 
-func queryWebi() (Web_info, error) {
+func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
-	snb := Web_info{}
-	row := db.QueryRow("SELECT * FROM web_info")
-
-	if err := row.Scan(
-		&snb.Total_amount,
-		&snb.Apr,
-		&snb.Paid_thru,
-		&snb.Current_balance,
-		&snb.Principal_paid,
-		&snb.Percent_principal_paid,
-		&snb.Interest_saved,
-		&snb.Payment_date,
-		&snb.Payment,
-		&snb.Principal,
-		&snb.Interest,
-		&snb.Balance,
-		&snb.Payment_number,
-		&snb.Percent_principal,
-		&snb.Percent_interest,
-	); err != nil {
-		fmt.Println("Error querying web_info")
-		return snb, err
-	}
-
-	return snb, nil
-
-}
-
-func queryAmor() ([]Amortize, error) {
-
-	rows, err := db.Query("SELECT * FROM amortize")
+	f := "layoutAmor.html"
+	_, err := os.Stat(f)
 	if err != nil {
-		fmt.Println("Error querying amortize")
-		return nil, err
+		fmt.Println(f, "not found.")
+		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
+		return
 	}
 
-	defer rows.Close()
-
-	snbs := make([]Amortize, 0)
-
-	for rows.Next() {
-		snb := Amortize{}
-		err := rows.Scan(
-			&snb.Payment_date,
-			&snb.Payment,
-			&snb.Principal,
-			&snb.Interest,
-			&snb.Total_interest,
-			&snb.Balance,
-			&snb.Payment_number,
-			&snb.Percent_principal,
-			&snb.Percent_interest,
-		)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		snbs = append(snbs, snb)
-	}
-
-	return snbs, nil
-
-}
-
-func test(w http.ResponseWriter, r *http.Request) {
-
-	jsonResponse := JSONResponse{
-		Status: "OK",
-	}
-	json.NewEncoder(w).Encode(jsonResponse)
-
-}
-
-func getWebiJson(w http.ResponseWriter, r *http.Request) {
-
-	recs, err := queryWebi()
+	recs, err := queryAmor()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
 
-	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
-	resp := json.NewEncoder(w)
-	resp.SetIndent("", "    ")
-	resp.Encode(recs)
+	// fmt.Printf("%+v", recs)
+
+	tmpl := template.Must(template.ParseFiles(f))
+	tmpl.Execute(w, recs) //recs[0])
 
 }
 
@@ -211,26 +144,93 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getAmorHtml(w http.ResponseWriter, r *http.Request) {
+func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
-	f := "layoutAmor.html"
-	_, err := os.Stat(f)
-	if err != nil {
-		fmt.Println(f, "not found.")
-		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
-		return
-	}
-
-	recs, err := queryAmor()
+	recs, err := queryWebi()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
 
-	// fmt.Printf("%+v", recs)
+	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
+	resp := json.NewEncoder(w)
+	resp.SetIndent("", "    ")
+	resp.Encode(recs)
 
-	tmpl := template.Must(template.ParseFiles(f))
-	tmpl.Execute(w, recs) //recs[0])
+}
+
+func queryAmor() ([]Amortize, error) {
+
+	rows, err := db.Query("SELECT * FROM amortize")
+	if err != nil {
+		fmt.Println("Error querying amortize")
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	snbs := make([]Amortize, 0)
+
+	for rows.Next() {
+		snb := Amortize{}
+		err := rows.Scan(
+			&snb.Payment_date,
+			&snb.Payment,
+			&snb.Principal,
+			&snb.Interest,
+			&snb.Total_interest,
+			&snb.Balance,
+			&snb.Payment_number,
+			&snb.Percent_principal,
+			&snb.Percent_interest,
+		)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		snbs = append(snbs, snb)
+	}
+
+	return snbs, nil
+
+}
+
+func queryWebi() (Web_info, error) {
+
+	snb := Web_info{}
+	row := db.QueryRow("SELECT * FROM web_info")
+
+	if err := row.Scan(
+		&snb.Total_amount,
+		&snb.Apr,
+		&snb.Paid_thru,
+		&snb.Current_balance,
+		&snb.Principal_paid,
+		&snb.Percent_principal_paid,
+		&snb.Interest_saved,
+		&snb.Payment_date,
+		&snb.Payment,
+		&snb.Principal,
+		&snb.Interest,
+		&snb.Balance,
+		&snb.Payment_number,
+		&snb.Percent_principal,
+		&snb.Percent_interest,
+	); err != nil {
+		fmt.Println("Error querying web_info")
+		return snb, err
+	}
+
+	return snb, nil
+
+}
+
+func test(w http.ResponseWriter, r *http.Request) {
+
+	jsonResponse := JSONResponse{
+		Status: "OK",
+	}
+	json.NewEncoder(w).Encode(jsonResponse)
 
 }
