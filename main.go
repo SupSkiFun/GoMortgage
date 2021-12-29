@@ -185,6 +185,12 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
+	if r.URL.Path != "/" {
+		fmt.Println(r.URL.Path, "not found.")
+		http.Error(w, r.URL.Path+" not found", http.StatusNotFound)
+		return
+	}
+
 	f := "layoutWebi.html"
 	_, err := os.Stat(f)
 	if err != nil {
