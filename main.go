@@ -34,6 +34,18 @@ type Web_info struct {
 	Percent_interest       string `json:"percent_interest"`
 }
 
+type Amortize struct {
+	Payment_date      string `json:"payment_date"`
+	Payment           string `json:"payment"`
+	Principal         string `json:"principal"`
+	Interest          string `json:"interest "`
+	Total_interest    string `json:"total_interest"`
+	Balance           string `json:"balance"`
+	Payment_number    string `json:"payment_number"`
+	Percent_principal string `json:"percent_principal"`
+	Percent_interest  string `json:"percent_interest"`
+}
+
 var (
 	db *sql.DB
 	//err error  Maybe use for init() sql.Open Statement?  Or just declare in init()?
@@ -53,8 +65,10 @@ func init() {
 
 func main() {
 
-	http.HandleFunc("/", retrieveHTML)
-	http.HandleFunc("/json", retrieveJSON)
+	http.HandleFunc("/", getWebiHtml)
+	http.HandleFunc("/jsonWebInfo", getWebiJson)
+	http.HandleFunc("/amortize", getAmorHtml)
+	http.HandleFunc("/jsonAmortize", getAmorJson)
 	http.HandleFunc("/test/", test)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
@@ -62,31 +76,61 @@ func main() {
 
 }
 
-func queryDB() ([]Web_info, error) {
+func queryWEBI() (Web_info, error) {
 
-	rows, err := db.Query("SELECT * FROM web_info")
-	if err != nil {
+	snb := Web_info{}
+	row := db.QueryRow("SELECT * FROM web_info")
+	// if err != nil {
+	// 	fmt.Println("Error querying web_info")
+	// 	return nil, err
+	// }
+
+	//defer row.Close()
+
+	if err := row.Scan(
+		&snb.Total_amount,
+		&snb.Apr,
+		&snb.Paid_thru,
+		&snb.Current_balance,
+		&snb.Principal_paid,
+		&snb.Percent_principal_paid,
+		&snb.Interest_saved,
+		&snb.Payment_date,
+		&snb.Payment,
+		&snb.Principal,
+		&snb.Interest,
+		&snb.Balance,
+		&snb.Payment_number,
+		&snb.Percent_principal,
+		&snb.Percent_interest,
+	); err != nil {
 		fmt.Println("Error querying web_info")
+		return snb, err
+	}
+
+	return snb, nil
+
+}
+
+func queryAMOR() ([]Amortize, error) {
+
+	rows, err := db.Query("SELECT * FROM amortize")
+	if err != nil {
+		fmt.Println("Error querying amortize")
 		return nil, err
 	}
 	defer rows.Close()
 
-	snbs := make([]Web_info, 0)
+	snbs := make([]Amortize, 0)
 
 	for rows.Next() {
-		snb := Web_info{}
+		snb := Amortize{}
 		err := rows.Scan(
-			&snb.Total_amount,
-			&snb.Apr,
-			&snb.Paid_thru,
-			&snb.Current_balance,
-			&snb.Principal_paid,
-			&snb.Percent_principal_paid,
-			&snb.Interest_saved,
 			&snb.Payment_date,
 			&snb.Payment,
 			&snb.Principal,
 			&snb.Interest,
+			&snb.Total_interest,
 			&snb.Balance,
 			&snb.Payment_number,
 			&snb.Percent_principal,
@@ -112,9 +156,9 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func retrieveJSON(w http.ResponseWriter, r *http.Request) {
+func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
-	recs, err := queryDB()
+	recs, err := queryWEBI()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
@@ -128,24 +172,63 @@ func retrieveJSON(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func retrieveHTML(w http.ResponseWriter, r *http.Request) {
+func getAmorJson(w http.ResponseWriter, r *http.Request) {
+
+	recs, err := queryAMOR()
+	if err != nil {
+		fmt.Println("Error querying amortize")
+		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
+		return
+	}
+
+	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
+	resp := json.NewEncoder(w)
+	resp.SetIndent("", "    ")
+	resp.Encode(recs)
+
+}
+
+func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 	f := "layout.html"
 	_, err := os.Stat(f)
 	if err != nil {
-		fmt.Println("layout.html not found.")
+		// fmt.Println("layout.html not found.")
+		fmt.Println(f, "not found.")
 		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
 		return
 	}
 
-	recs, err := queryDB()
+	recs, err := queryWEBI()
 	if err != nil {
 		fmt.Println("Error querying web_info")
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
-	// fmt.Print(snbs[0].Apr)  DEBUG ITEM
+
 	tmpl := template.Must(template.ParseFiles(f))
-	tmpl.Execute(w, recs[0])
+	tmpl.Execute(w, recs) //recs[0])
+
+}
+
+func getAmorHtml(w http.ResponseWriter, r *http.Request) {
+
+	f := "layoutAMOR.html"
+	_, err := os.Stat(f)
+	if err != nil {
+		fmt.Println(f, "not found.")
+		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
+		return
+	}
+
+	recs, err := queryAMOR()
+	if err != nil {
+		fmt.Println("Error querying web_info")
+		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles(f))
+	tmpl.Execute(w, recs) //recs[0])
 
 }
