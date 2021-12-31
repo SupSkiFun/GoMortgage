@@ -70,6 +70,8 @@ func main() {
 	http.HandleFunc("/amortize", getAmorHtml)
 	http.HandleFunc("/jsonAmortize", getAmorJson)
 	http.HandleFunc("/test/", test)
+	http.HandleFunc("/json1", getWebiJson)
+	http.HandleFunc("/json2", getAmorJson)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
 	http.ListenAndServe(":80", nil)
