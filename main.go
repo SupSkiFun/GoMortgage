@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 
@@ -83,14 +82,14 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 	f := "layoutAmor.html"
 	_, err := os.Stat(f)
 	if err != nil {
-		fmt.Println(f, "not found.")
+		fmt.Println("func:getAmorHtml", f, "not found", err.Error())
 		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
 		return
 	}
 
 	recs, err := queryAmor()
 	if err != nil {
-		fmt.Println("Error querying web_info")
+		fmt.Println("func:getAmorHtml", "error calling queryAmor()", err.Error())
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
@@ -106,7 +105,7 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
 	recs, err := queryAmor()
 	if err != nil {
-		fmt.Println("Error querying amortize")
+		fmt.Println("func:getAmorJson", "error calling queryAmor()", err.Error())
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
@@ -121,7 +120,7 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/" {
-		fmt.Println(r.URL.Path, "not found.")
+		fmt.Println("func:getWebiHtml", r.URL.Path, "not found.")
 		http.Error(w, r.URL.Path+" not found", http.StatusNotFound)
 		return
 	}
@@ -129,14 +128,14 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 	f := "layoutWebi.html"
 	_, err := os.Stat(f)
 	if err != nil {
-		fmt.Println(f, "not found.")
+		fmt.Println("func:getWebiHtml", f, "not found", err.Error())
 		http.Error(w, "HTML template issue", http.StatusServiceUnavailable)
 		return
 	}
 
 	recs, err := queryWebi()
 	if err != nil {
-		fmt.Println("Error querying web_info")
+		fmt.Println("func:getWebiHtml", "error calling queryWebi()", err.Error())
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
@@ -150,7 +149,7 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
 	recs, err := queryWebi()
 	if err != nil {
-		fmt.Println("Error querying web_info")
+		fmt.Println("func:getWebiJson", "error calling queryAmor()", err.Error())
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
@@ -166,7 +165,7 @@ func queryAmor() ([]Amortize, error) {
 
 	rows, err := db.Query("SELECT * FROM amortize")
 	if err != nil {
-		fmt.Println("Error querying amortize")
+		fmt.Println("func:queryAmor", "Error querying amortize table", err.Error())
 		return nil, err
 	}
 
@@ -188,7 +187,8 @@ func queryAmor() ([]Amortize, error) {
 			&snb.Percent_interest,
 		)
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
+			fmt.Println("func:queryAmor", "error processing rows from amortize table", err.Error())
 			return nil, err
 		}
 		snbs = append(snbs, snb)
@@ -220,7 +220,7 @@ func queryWebi() (Web_info, error) {
 		&snb.Percent_principal,
 		&snb.Percent_interest,
 	); err != nil {
-		fmt.Println("Error querying web_info")
+		fmt.Println("func:queryWebi", "error querying web_info table", err.Error())
 		return snb, err
 	}
 
