@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -45,29 +46,21 @@ type Web_info struct {
 	Percent_interest       string `json:"percent_interest"`
 }
 
-var db *sql.DB
+// below var err and init if tz for manually loading TZ info.  Decided not a good idea.
+
+var (
+	db  *sql.DB
+	err error
+)
 
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	// connectDB()
-}
-
-func main() {
-
-	connectDB()
-	runWEB()
-
-	// http.HandleFunc("/", getWebiHtml)
-	// http.HandleFunc("/jsonWebInfo", getWebiJson)
-	// http.HandleFunc("/amortize", getAmorHtml)
-	// http.HandleFunc("/jsonAmortize", getAmorJson)
-	// http.HandleFunc("/test/", test)
-	// http.HandleFunc("/json1", getWebiJson)
-	// http.HandleFunc("/json2", getAmorJson)
-	// fs := http.FileServer(http.Dir("./gopher"))
-	// http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
-	// log.Fatal(http.ListenAndServe(":80", nil))
-
+	if tz := os.Getenv("TZ"); tz != "" {
+		time.Local, err = time.LoadLocation(tz)
+		if err != nil {
+			log.Printf("error loading location '%s': %v\n", tz, err)
+		}
+	}
 }
 
 func connectDB() {
@@ -86,7 +79,10 @@ func connectDB() {
 	}
 }
 
-func runWEB() {
+func main() {
+
+	connectDB()
+
 	http.HandleFunc("/", getWebiHtml)
 	http.HandleFunc("/jsonWebInfo", getWebiJson)
 	http.HandleFunc("/amortize", getAmorHtml)
@@ -96,7 +92,8 @@ func runWEB() {
 	http.HandleFunc("/json2", getAmorJson)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
-	log.Fatal(http.ListenAndServe(":80", nil))
+	http.ListenAndServe(":80", nil)
+
 }
 
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {

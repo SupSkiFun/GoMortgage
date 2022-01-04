@@ -49,25 +49,6 @@ var db *sql.DB
 
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	// connectDB()
-}
-
-func main() {
-
-	connectDB()
-	runWEB()
-
-	// http.HandleFunc("/", getWebiHtml)
-	// http.HandleFunc("/jsonWebInfo", getWebiJson)
-	// http.HandleFunc("/amortize", getAmorHtml)
-	// http.HandleFunc("/jsonAmortize", getAmorJson)
-	// http.HandleFunc("/test/", test)
-	// http.HandleFunc("/json1", getWebiJson)
-	// http.HandleFunc("/json2", getAmorJson)
-	// fs := http.FileServer(http.Dir("./gopher"))
-	// http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
-	// log.Fatal(http.ListenAndServe(":80", nil))
-
 }
 
 func connectDB() {
@@ -86,7 +67,10 @@ func connectDB() {
 	}
 }
 
-func runWEB() {
+func main() {
+
+	connectDB()
+
 	http.HandleFunc("/", getWebiHtml)
 	http.HandleFunc("/jsonWebInfo", getWebiJson)
 	http.HandleFunc("/amortize", getAmorHtml)
@@ -96,7 +80,8 @@ func runWEB() {
 	http.HandleFunc("/json2", getAmorJson)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
-	log.Fatal(http.ListenAndServe(":80", nil))
+	http.ListenAndServe(":80", nil)
+
 }
 
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
