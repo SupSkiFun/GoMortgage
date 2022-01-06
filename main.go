@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -49,24 +48,12 @@ var db *sql.DB
 
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	// connectDB()
 }
 
 func main() {
 
 	connectDB()
 	runWEB()
-
-	// http.HandleFunc("/", getWebiHtml)
-	// http.HandleFunc("/jsonWebInfo", getWebiJson)
-	// http.HandleFunc("/amortize", getAmorHtml)
-	// http.HandleFunc("/jsonAmortize", getAmorJson)
-	// http.HandleFunc("/test/", test)
-	// http.HandleFunc("/json1", getWebiJson)
-	// http.HandleFunc("/json2", getAmorJson)
-	// fs := http.FileServer(http.Dir("./gopher"))
-	// http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
-	// log.Fatal(http.ListenAndServe(":80", nil))
 
 }
 
@@ -88,163 +75,16 @@ func connectDB() {
 
 func runWEB() {
 	http.HandleFunc("/", getWebiHtml)
-	http.HandleFunc("/jsonWebInfo", getWebiJson)
-	http.HandleFunc("/amortize", getAmorHtml)
-	http.HandleFunc("/jsonAmortize", getAmorJson)
-	http.HandleFunc("/test/", test)
+	http.HandleFunc("/webinfo", getWebiHtml)
+	http.HandleFunc("/webinfojson", getWebiJson)
 	http.HandleFunc("/json1", getWebiJson)
+	http.HandleFunc("/amortize", getAmorHtml)
+	http.HandleFunc("/amortizejson", getAmorJson)
 	http.HandleFunc("/json2", getAmorJson)
+	http.HandleFunc("/test/", test)
 	fs := http.FileServer(http.Dir("./gopher"))
 	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
 	log.Fatal(http.ListenAndServe(":80", nil))
-}
-
-func getAmorHtml(w http.ResponseWriter, r *http.Request) {
-
-	f := "layoutAmor.html"
-	_, err := os.Stat(f)
-	if err != nil {
-		log.Println(f, "not found: ", err.Error())
-		http.Error(w, "HTML template issue", http.StatusInternalServerError)
-		return
-	}
-
-	recs, err := queryAmor()
-	if err != nil {
-		log.Println("error calling queryAmor(): ", err.Error())
-		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
-		return
-	}
-
-	tmpl := template.Must(template.ParseFiles(f))
-	tmpl.Execute(w, recs) //recs[0])
-
-}
-
-func getAmorJson(w http.ResponseWriter, r *http.Request) {
-
-	recs, err := queryAmor()
-	if err != nil {
-		log.Println("error calling queryAmor(): ", err.Error())
-		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
-		return
-	}
-
-	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
-	resp := json.NewEncoder(w)
-	resp.SetIndent("", "    ")
-	resp.Encode(recs)
-
-}
-
-func getWebiHtml(w http.ResponseWriter, r *http.Request) {
-
-	if r.URL.Path != "/" {
-		log.Println(r.URL.Path, "not found: ")
-		http.Error(w, r.URL.Path+" not found", http.StatusNotFound)
-		return
-	}
-
-	f := "layoutWebi.html"
-	_, err := os.Stat(f)
-	if err != nil {
-		log.Println(f, "not found: ", err.Error())
-		http.Error(w, "HTML template issue", http.StatusInternalServerError)
-		return
-	}
-
-	recs, err := queryWebi()
-	if err != nil {
-		log.Println("error calling queryWebi(): ", err.Error())
-		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
-		return
-	}
-
-	tmpl := template.Must(template.ParseFiles(f))
-	tmpl.Execute(w, recs) //recs[0])
-
-}
-
-func getWebiJson(w http.ResponseWriter, r *http.Request) {
-
-	recs, err := queryWebi()
-	if err != nil {
-		log.Println("error calling queryAmor(): ", err.Error())
-		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
-		return
-	}
-
-	// for no indent use: json.NewEncoder(w).Encode(snbs) - below has indent
-	resp := json.NewEncoder(w)
-	resp.SetIndent("", "    ")
-	resp.Encode(recs)
-
-}
-
-func queryAmor() ([]Amortize, error) {
-
-	rows, err := db.Query("SELECT * FROM amortize")
-	if err != nil {
-		log.Println("Error querying amortize table: ", err.Error())
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	snbs := make([]Amortize, 0)
-
-	for rows.Next() {
-		snb := Amortize{}
-		err := rows.Scan(
-			&snb.Payment_date,
-			&snb.Payment,
-			&snb.Principal,
-			&snb.Interest,
-			&snb.Total_interest,
-			&snb.Balance,
-			&snb.Payment_number,
-			&snb.Percent_principal,
-			&snb.Percent_interest,
-		)
-		if err != nil {
-			log.Println("error processing rows from amortize table: ", err.Error())
-			return nil, err
-		}
-		snbs = append(snbs, snb)
-	}
-
-	return snbs, nil
-
-}
-
-func queryWebi() (Web_info, error) {
-
-	snb := Web_info{}
-	row := db.QueryRow("SELECT * FROM web_info")
-
-	if err := row.Scan(
-		&snb.Total_amount,
-		&snb.Apr,
-		&snb.Paid_thru,
-		&snb.Current_balance,
-		&snb.Principal_paid,
-		&snb.Percent_principal_paid,
-		&snb.Interest_saved,
-		&snb.Payment_date,
-		&snb.Payment,
-		&snb.Principal,
-		&snb.Interest,
-		&snb.Balance,
-		&snb.Payment_number,
-		&snb.Percent_principal,
-		&snb.Percent_interest,
-	); err != nil {
-		log.Println("error querying web_info table: ", err.Error())
-		return snb, err
-	}
-
-	return snb, nil
-
 }
 
 func test(w http.ResponseWriter, r *http.Request) {

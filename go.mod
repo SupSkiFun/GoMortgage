@@ -1,4 +1,4 @@
-module webtempl
+module github.com/SupSkiFun/GoMortgage
 
 go 1.17
 
