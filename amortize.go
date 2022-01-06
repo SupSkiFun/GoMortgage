@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+// getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
 	f := "layoutAmor.html"
@@ -30,6 +31,7 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// getAmorJson renders JSON from Postgres via queryAmor().
 func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
 	recs, err := queryAmor()
@@ -46,6 +48,7 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// queryAmor queries and returns results from Postgres table amortize.
 func queryAmor() ([]Amortize, error) {
 
 	rows, err := db.Query("SELECT * FROM amortize")

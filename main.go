@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Amortize is used for a) Postgres data and b) Marshalling JSON.
 type Amortize struct {
 	Payment_date      string `json:"payment_date"`
 	Payment           string `json:"payment"`
@@ -22,11 +23,13 @@ type Amortize struct {
 	Percent_interest  string `json:"percent_interest"`
 }
 
+// JSONResponse works with test() to provide a simple JSON response.
 type JSONResponse struct {
 	Status string `json:"status"`
 }
 
-type Web_info struct {
+// WebInfo is used for a) Postgres data and b) Marshalling JSON.
+type WebInfo struct {
 	Total_amount           string `json:"total_amount"`
 	Apr                    string `json:"apr"`
 	Paid_thru              string `json:"paid_thru"`
@@ -57,6 +60,7 @@ func main() {
 
 }
 
+// connectDB initializes a connection to Postgres.
 func connectDB() {
 	dbh := os.Getenv("DB_HOST")
 	dbn := os.Getenv("DB_NAME")
@@ -73,6 +77,7 @@ func connectDB() {
 	}
 }
 
+// runWEB registers handlers and starts the web server.
 func runWEB() {
 	http.HandleFunc("/", getWebiHtml)
 	http.HandleFunc("/webinfo", getWebiHtml)
@@ -87,6 +92,7 @@ func runWEB() {
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
+// test provides a basic JSON response.
 func test(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse := JSONResponse{

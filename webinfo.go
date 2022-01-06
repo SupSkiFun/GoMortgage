@@ -8,8 +8,10 @@ import (
 	"os"
 )
 
+// getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
+	// this needs to move once a / handler is made with a landing page
 	if r.URL.Path != "/" {
 		log.Println(r.URL.Path, "not found: ")
 		http.Error(w, r.URL.Path+" not found", http.StatusNotFound)
@@ -36,6 +38,7 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// getWebiJson renders JSON from Postgres via queryWebi().
 func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
 	recs, err := queryWebi()
@@ -52,9 +55,10 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func queryWebi() (Web_info, error) {
+// queryWebi queries and returns results from Postgres view web_info.
+func queryWebi() (WebInfo, error) {
 
-	snb := Web_info{}
+	snb := WebInfo{}
 	row := db.QueryRow("SELECT * FROM web_info")
 
 	if err := row.Scan(
