@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wooley Booley!</title>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
+</head>
+
+<body>
+    <h1>Amortization Table</h1>
+    <br>
+    <table>
+            <tr>
+                <th>Payment Date</th>
+                <th>Payment</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Total Interest</th>
+                <th>Balance</th>
+                <th>Payment Number</th>
+                <th>Percent Principal</th>
+                <th>Percent Interest</th>
+            </tr>
+            {{range .}}
+            <tr>
+                <td>{{.Payment_date}}</td>
+                <td>{{.Payment}}</td>
+                <td>{{.Principal}}</td>
+                <td>{{.Interest }}</td>
+                <td>{{.Total_interest}}</td>
+                <td>{{.Balance}}</td>
+                <td>{{.Payment_number }}</td>
+                <td>{{.Percent_principal }}</td>
+                <td>{{.Percent_interest}}</td>
+            </tr>
+        {{end}} 
+    </table>    
+
+
+</body>
+
+</html>

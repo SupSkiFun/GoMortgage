@@ -79,7 +79,8 @@ func connectDB() {
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
-	http.HandleFunc("/", getWebiHtml)
+	fr := http.FileServer(http.Dir("./htdocs"))
+	http.Handle("/", fr)
 	http.HandleFunc("/webinfo", getWebiHtml)
 	http.HandleFunc("/webinfojson", getWebiJson)
 	http.HandleFunc("/json1", getWebiJson)
@@ -87,8 +88,9 @@ func runWEB() {
 	http.HandleFunc("/amortizejson", getAmorJson)
 	http.HandleFunc("/json2", getAmorJson)
 	http.HandleFunc("/test/", test)
-	fs := http.FileServer(http.Dir("./gopher"))
-	http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
+	// To serve a directory use the below:
+	// fs := http.FileServer(http.Dir("./gopher"))
+	// http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
 

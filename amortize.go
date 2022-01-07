@@ -11,7 +11,7 @@ import (
 // getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
-	f := "layoutAmor.html"
+	f := "./templates/layoutAmor.html"
 	_, err := os.Stat(f)
 	if err != nil {
 		log.Println(f, "not found: ", err.Error())

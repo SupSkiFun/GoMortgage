@@ -11,14 +11,7 @@ import (
 // getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
-	// this needs to move once a / handler is made with a landing page.  awkward below...
-	if !(r.URL.Path == "/") && !(r.URL.Path == "/webinfo") {
-		log.Println(r.URL.Path, "not found: ")
-		http.Error(w, r.URL.Path+" not found", http.StatusNotFound)
-		return
-	}
-
-	f := "layoutWebi.html"
+	f := "./templates/layoutWebi.html"
 	_, err := os.Stat(f)
 	if err != nil {
 		log.Println(f, "not found: ", err.Error())
