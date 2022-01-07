@@ -88,9 +88,8 @@ func runWEB() {
 	http.HandleFunc("/amortizejson", getAmorJson)
 	http.HandleFunc("/json2", getAmorJson)
 	http.HandleFunc("/test/", test)
-	// To serve a directory use the below:
-	// fs := http.FileServer(http.Dir("./gopher"))
-	// http.Handle("/gopher/", http.StripPrefix("/gopher/", fs))
+	fs := http.FileServer(http.Dir("./proverbs"))
+	http.Handle("/proverbs/", http.StripPrefix("/proverbs/", fs))
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
