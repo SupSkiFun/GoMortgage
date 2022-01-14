@@ -58,9 +58,8 @@ func queryAmor() ([]Amortize, error) {
 	}
 
 	defer rows.Close()
-	ctr := 0
-	// amortize table will always have exactly 360 records
-	snbs := make([]Amortize, 360)
+
+	snbs := make([]Amortize, 0)
 
 	for rows.Next() {
 		snb := Amortize{}
@@ -79,9 +78,7 @@ func queryAmor() ([]Amortize, error) {
 			log.Println("error processing rows from amortize table: ", err.Error())
 			return nil, err
 		}
-
-		snbs[ctr] = snb
-		ctr++
+		snbs = append(snbs, snb)
 	}
 
 	return snbs, nil

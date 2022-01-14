@@ -58,8 +58,8 @@ func queryAmor() ([]Amortize, error) {
 	}
 
 	defer rows.Close()
+
 	ctr := 0
-	// amortize table will always have exactly 360 records
 	snbs := make([]Amortize, 360)
 
 	for rows.Next() {
