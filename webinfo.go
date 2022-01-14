@@ -51,6 +51,7 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 // queryWebi queries and returns results from Postgres view web_info.
 func queryWebi() (WebInfo, error) {
 
+	// view web_info only has one record
 	snb := WebInfo{}
 	row := db.QueryRow("SELECT * FROM web_info")
 
