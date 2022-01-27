@@ -15,7 +15,7 @@ type Amortize struct {
 	Payment_date      string `json:"payment_date"`
 	Payment           string `json:"payment"`
 	Principal         string `json:"principal"`
-	Interest          string `json:"interest "`
+	Interest          string `json:"interest"`
 	Total_interest    string `json:"total_interest"`
 	Balance           string `json:"balance"`
 	Payment_number    string `json:"payment_number"`
