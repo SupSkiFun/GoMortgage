@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -80,37 +79,18 @@ func connectDB() {
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
-
-	var err error
-	m := http.NewServeMux()
-	s := &http.Server{
-		Handler:           m,
-		IdleTimeout:       30 * time.Second,
-		ReadTimeout:       3 * time.Second,
-		WriteTimeout:      3 * time.Second,
-		ReadHeaderTimeout: 2 * time.Second,
-	}
-
-	m.Handle("/webinfo", http.HandlerFunc(getWebiHtml))
-	m.Handle("/webinfojson", http.HandlerFunc(getWebiJson))
-	m.Handle("/json1", http.HandlerFunc(getWebiJson))
-	m.Handle("/amortize", http.HandlerFunc(getAmorHtml))
-	m.Handle("/amortizejson", http.HandlerFunc(getAmorJson))
-	m.Handle("/json2", http.HandlerFunc(getAmorJson))
-	m.Handle("/test/", http.HandlerFunc(test))
-
 	fr := http.FileServer(http.Dir("./htdocs"))
-	m.Handle("/", fr)
-
+	http.Handle("/", fr)
+	http.HandleFunc("/webinfo", getWebiHtml)
+	http.HandleFunc("/webinfojson", getWebiJson)
+	http.HandleFunc("/json1", getWebiJson)
+	http.HandleFunc("/amortize", getAmorHtml)
+	http.HandleFunc("/amortizejson", getAmorJson)
+	http.HandleFunc("/json2", getAmorJson)
+	http.HandleFunc("/test/", test)
 	fs := http.FileServer(http.Dir("./proverbs"))
-	m.Handle("/proverbs/", http.StripPrefix("/proverbs", fs))
-
-	err = s.ListenAndServe()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	http.Handle("/proverbs/", http.StripPrefix("/proverbs/", fs))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 // test provides a basic JSON response.
