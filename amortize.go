@@ -51,7 +51,7 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 // queryAmor queries and returns results from Postgres table amortize.
 func queryAmor() ([]Amortize, error) {
 
-	rows, err := db.Query("SELECT * FROM amortize")
+	rows, err := db.Query("SELECT * FROM amortize ORDER BY payment_number;")
 	if err != nil {
 		log.Println("Error querying amortize table: ", err.Error())
 		return nil, err
