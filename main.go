@@ -9,6 +9,8 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	// "github.com/prometheus/client_golang/prometheus"
+	// "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -56,10 +58,8 @@ func init() {
 }
 
 func main() {
-
 	connectDB()
 	runWEB()
-
 }
 
 // connectDB initializes a connection to Postgres.
@@ -81,7 +81,6 @@ func connectDB() {
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
-
 	var err error
 	m := http.NewServeMux()
 	s := &http.Server{
@@ -112,15 +111,12 @@ func runWEB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 // test provides a basic JSON response.
 func test(w http.ResponseWriter, r *http.Request) {
-
 	jsonResponse := JSONResponse{
 		Status: "OK",
 	}
 	json.NewEncoder(w).Encode(jsonResponse)
-
 }
