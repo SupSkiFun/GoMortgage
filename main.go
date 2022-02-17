@@ -92,6 +92,7 @@ func runWEB() {
 	}
 
 	m.Handle("/webinfo", http.HandlerFunc(getWebiHtml))
+	// m.Handle("/bogus", http.RedirectHandler("/webinfo", http.StatusMovedPermanently))
 	m.Handle("/webinfojson", http.HandlerFunc(getWebiJson))
 	m.Handle("/json1", http.HandlerFunc(getWebiJson))
 	m.Handle("/amortize", http.HandlerFunc(getAmorHtml))
