@@ -91,9 +91,11 @@ func runWEB() {
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	m.Handle("/webinfo", http.HandlerFunc(getWebiHtml))
-	// m.Handle("/bogus", http.RedirectHandler("/webinfo", http.StatusMovedPermanently))
-	m.Handle("/webinfojson", http.HandlerFunc(getWebiJson))
+	m.Handle("/mortgage", http.HandlerFunc(getWebiHtml))
+	m.Handle("/webinfo", http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
+	m.Handle("/mortgagejson", http.HandlerFunc(getWebiJson))
+	m.Handle("/webinfojson", http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
+
 	m.Handle("/json1", http.HandlerFunc(getWebiJson))
 	m.Handle("/amortize", http.HandlerFunc(getAmorHtml))
 	m.Handle("/amortizejson", http.HandlerFunc(getAmorJson))
