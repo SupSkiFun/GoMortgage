@@ -92,16 +92,16 @@ func runWEB() {
 	}
 
 	m.Handle("/mortgage", http.HandlerFunc(getWebiHtml))
-	m.Handle("/webinfo", http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
 	m.Handle("/mortgagejson", http.HandlerFunc(getWebiJson))
-	m.Handle("/webinfojson", http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
-
 	m.Handle("/json1", http.HandlerFunc(getWebiJson))
 	m.Handle("/amortize", http.HandlerFunc(getAmorHtml))
 	m.Handle("/amortizejson", http.HandlerFunc(getAmorJson))
 	m.Handle("/json2", http.HandlerFunc(getAmorJson))
 	m.Handle("/test/", http.HandlerFunc(test))
 	m.Handle("/metrics", promhttp.Handler())
+
+	m.Handle("/webinfo", http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
+	m.Handle("/webinfojson", http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 
 	fr := http.FileServer(http.Dir("./htdocs"))
 	m.Handle("/", fr)
