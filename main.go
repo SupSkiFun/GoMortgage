@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	_ "github.com/lib/pq"
 )
 
 // Amortize is used for a) Postgres data and b) Marshalling JSON.
