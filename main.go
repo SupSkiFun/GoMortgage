@@ -11,8 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 
-	// "github.com/prometheus/client_golang/prometheus"
-	// "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -57,6 +55,9 @@ var db *sql.DB
 
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	// prometheus.Register(totalRequests)
+	// prometheus.Register(responseStatus)
+	// prometheus.Register(httpDuration)
 }
 
 func main() {
@@ -84,33 +85,34 @@ func connectDB() {
 // runWEB registers handlers and starts the web server.
 func runWEB() {
 	var err error
-	r := mux.NewRouter()
+	rtr := mux.NewRouter()
+	rtr.Use(prometheusMiddleware)
 	s := &http.Server{
-		Handler:           r,
+		Handler:           rtr,
 		IdleTimeout:       30 * time.Second,
 		ReadTimeout:       3 * time.Second,
 		WriteTimeout:      3 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	r.HandleFunc("/mortgage", getWebiHtml)
-	r.HandleFunc("/mortgagejson", getWebiJson)
-	r.HandleFunc("/json1", getWebiJson)
-	r.HandleFunc("/amortize", getAmorHtml)
-	r.HandleFunc("/amortizejson", getAmorJson)
-	r.HandleFunc("/json2", getAmorJson)
-	r.HandleFunc("/test", test)
+	rtr.HandleFunc("/mortgage", getWebiHtml)
+	rtr.HandleFunc("/mortgagejson", getWebiJson)
+	rtr.HandleFunc("/json1", getWebiJson)
+	rtr.HandleFunc("/amortize", getAmorHtml)
+	rtr.HandleFunc("/amortizejson", getAmorJson)
+	rtr.HandleFunc("/json2", getAmorJson)
+	rtr.HandleFunc("/test", test)
 
-	r.Path("/prometheus").Handler(promhttp.Handler())
+	rtr.Path("/prometheus").Handler(promhttp.Handler())
 
-	r.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
-	r.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
+	rtr.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
+	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 
 	fr := http.FileServer(http.Dir("./proverbs"))
-	r.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
+	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
 
 	fs := http.FileServer(http.Dir("./htdocs"))
-	r.PathPrefix("/").Handler(http.StripPrefix("/", fs))
+	rtr.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
 	err = s.ListenAndServe()
 

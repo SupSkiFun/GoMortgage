@@ -6,8 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+
+	// "github.com/prometheus/client_golang/prometheus"
+	// "github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Amortize is used for a) Postgres data and b) Marshalling JSON.
@@ -49,17 +55,13 @@ type WebInfo struct {
 
 var db *sql.DB
 
-const PORT = ":80"
-
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
 
 func main() {
-
 	connectDB()
 	runWEB()
-
 }
 
 // connectDB initializes a connection to Postgres.
@@ -81,48 +83,46 @@ func connectDB() {
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
-
 	var err error
-	mux := http.NewServeMux()
+	r := mux.NewRouter()
 	s := &http.Server{
-		Addr:         PORT,
-		Handler:      mux,
-		IdleTimeout:  10, // * time.second,
-		ReadTimeout:  3,
-		WriteTimeout: 3,
+		Handler:           r,
+		IdleTimeout:       30 * time.Second,
+		ReadTimeout:       3 * time.Second,
+		WriteTimeout:      3 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	mux.Handle("/webinfo", http.HandlerFunc(getWebiHtml))
-	mux.Handle("/webinfojson", http.HandlerFunc(getWebiJson))
-	mux.Handle("/json1", http.HandlerFunc(getWebiJson))
-	mux.Handle("/amortize", http.HandlerFunc(getAmorHtml))
-	mux.Handle("/amortizejson", http.HandlerFunc(getAmorJson))
-	mux.Handle("/json2", http.HandlerFunc(getAmorJson))
-	mux.Handle("/test/", http.HandlerFunc(test))
+	r.HandleFunc("/mortgage", getWebiHtml)
+	r.HandleFunc("/mortgagejson", getWebiJson)
+	r.HandleFunc("/json1", getWebiJson)
+	r.HandleFunc("/amortize", getAmorHtml)
+	r.HandleFunc("/amortizejson", getAmorJson)
+	r.HandleFunc("/json2", getAmorJson)
+	r.HandleFunc("/test", test)
 
-	fr := http.FileServer(http.Dir("./htdocs"))
-	// http.Handle("/", fr)
-	mux.Handle("/", fr)
+	r.Path("/prometheus").Handler(promhttp.Handler())
 
-	fs := http.FileServer(http.Dir("./proverbs"))
-	// http.Handle("/proverbs/", http.StripPrefix("/proverbs/", fs))
-	mux.Handle("/proverbs/", http.StripPrefix("/proverbs", fs))
+	r.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
+	r.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
+
+	fr := http.FileServer(http.Dir("./proverbs"))
+	r.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
+
+	fs := http.FileServer(http.Dir("./htdocs"))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
 	err = s.ListenAndServe()
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 // test provides a basic JSON response.
 func test(w http.ResponseWriter, r *http.Request) {
-
 	jsonResponse := JSONResponse{
 		Status: "OK",
 	}
 	json.NewEncoder(w).Encode(jsonResponse)
-
 }
