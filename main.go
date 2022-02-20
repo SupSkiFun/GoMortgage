@@ -1,3 +1,7 @@
+/*
+Mortgage Application produces a container that interacts with postgreSQL.
+Metrics are exported to Prometheus.
+*/
 package main
 
 import (
