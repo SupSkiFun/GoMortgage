@@ -8,7 +8,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+
 	// "github.com/prometheus/client_golang/prometheus"
 	// "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -82,32 +84,33 @@ func connectDB() {
 // runWEB registers handlers and starts the web server.
 func runWEB() {
 	var err error
-	m := http.NewServeMux()
+	r := mux.NewRouter()
 	s := &http.Server{
-		Handler:           m,
+		Handler:           r,
 		IdleTimeout:       30 * time.Second,
 		ReadTimeout:       3 * time.Second,
 		WriteTimeout:      3 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	m.Handle("/mortgage", http.HandlerFunc(getWebiHtml))
-	m.Handle("/mortgagejson", http.HandlerFunc(getWebiJson))
-	m.Handle("/json1", http.HandlerFunc(getWebiJson))
-	m.Handle("/amortize", http.HandlerFunc(getAmorHtml))
-	m.Handle("/amortizejson", http.HandlerFunc(getAmorJson))
-	m.Handle("/json2", http.HandlerFunc(getAmorJson))
-	m.Handle("/test/", http.HandlerFunc(test))
-	m.Handle("/metrics", promhttp.Handler())
+	r.HandleFunc("/mortgage", getWebiHtml)
+	r.HandleFunc("/mortgagejson", getWebiJson)
+	r.HandleFunc("/json1", getWebiJson)
+	r.HandleFunc("/amortize", getAmorHtml)
+	r.HandleFunc("/amortizejson", getAmorJson)
+	r.HandleFunc("/json2", getAmorJson)
+	r.HandleFunc("/test", test)
 
-	m.Handle("/webinfo", http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
-	m.Handle("/webinfojson", http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
+	r.Path("/prometheus").Handler(promhttp.Handler())
+
+	r.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
+	r.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 
 	fr := http.FileServer(http.Dir("./htdocs"))
-	m.Handle("/", fr)
+	r.PathPrefix("/").Handler(http.StripPrefix("/", fr))
 
 	fs := http.FileServer(http.Dir("./proverbs"))
-	m.Handle("/proverbs/", http.StripPrefix("/proverbs", fs))
+	r.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs", fs))
 
 	err = s.ListenAndServe()
 

@@ -3,6 +3,7 @@ module github.com/SupSkiFun/GoMortgage
 go 1.17
 
 require (
+	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.2
 	github.com/prometheus/client_golang v1.12.1
 )
