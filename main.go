@@ -106,11 +106,11 @@ func runWEB() {
 	r.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
 	r.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 
-	fr := http.FileServer(http.Dir("./htdocs"))
-	r.PathPrefix("/").Handler(http.StripPrefix("/", fr))
+	fr := http.FileServer(http.Dir("./proverbs"))
+	r.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
 
-	fs := http.FileServer(http.Dir("./proverbs"))
-	r.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs", fs))
+	fs := http.FileServer(http.Dir("./htdocs"))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
 	err = s.ListenAndServe()
 
