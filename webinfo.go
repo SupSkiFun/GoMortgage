@@ -10,7 +10,6 @@ import (
 
 // getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
-
 	f := "./templates/layoutWebi.html"
 	_, err := os.Stat(f)
 	if err != nil {
@@ -28,12 +27,10 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles(f))
 	tmpl.Execute(w, recs) //recs[0])
-
 }
 
 // getWebiJson renders JSON from Postgres via queryWebi().
 func getWebiJson(w http.ResponseWriter, r *http.Request) {
-
 	recs, err := queryWebi()
 	if err != nil {
 		log.Println("error calling queryAmor(): ", err.Error())
@@ -45,12 +42,10 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 	resp := json.NewEncoder(w)
 	resp.SetIndent("", "    ")
 	resp.Encode(recs)
-
 }
 
 // queryWebi queries and returns results from Postgres view web_info.
 func queryWebi() (WebInfo, error) {
-
 	// view web_info only has one record
 	snb := WebInfo{}
 	row := db.QueryRow("SELECT * FROM web_info")
@@ -77,5 +72,4 @@ func queryWebi() (WebInfo, error) {
 	}
 
 	return snb, nil
-
 }

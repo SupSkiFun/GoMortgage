@@ -10,7 +10,6 @@ import (
 
 // getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
-
 	f := "./templates/layoutAmor.html"
 	_, err := os.Stat(f)
 	if err != nil {
@@ -28,12 +27,10 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles(f))
 	tmpl.Execute(w, recs) //recs[0])
-
 }
 
 // getAmorJson renders JSON from Postgres via queryAmor().
 func getAmorJson(w http.ResponseWriter, r *http.Request) {
-
 	recs, err := queryAmor()
 	if err != nil {
 		log.Println("error calling queryAmor(): ", err.Error())
@@ -45,12 +42,10 @@ func getAmorJson(w http.ResponseWriter, r *http.Request) {
 	resp := json.NewEncoder(w)
 	resp.SetIndent("", "    ")
 	resp.Encode(recs)
-
 }
 
 // queryAmor queries and returns results from Postgres table amortize.
 func queryAmor() ([]Amortize, error) {
-
 	rows, err := db.Query("SELECT * FROM amortize ORDER BY payment_number;")
 	if err != nil {
 		log.Println("Error querying amortize table: ", err.Error())
@@ -85,5 +80,4 @@ func queryAmor() ([]Amortize, error) {
 	}
 
 	return snbs, nil
-
 }

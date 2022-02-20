@@ -102,20 +102,16 @@ func runWEB() {
 	rtr.HandleFunc("/amortizejson", getAmorJson)
 	rtr.HandleFunc("/json2", getAmorJson)
 	rtr.HandleFunc("/test", test)
-
 	rtr.Path("/prometheus").Handler(promhttp.Handler())
-
 	rtr.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
 	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 
 	fr := http.FileServer(http.Dir("./proverbs"))
 	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
-
 	fs := http.FileServer(http.Dir("./htdocs"))
 	rtr.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
 	err = s.ListenAndServe()
-
 	if err != nil {
 		log.Fatal(err)
 	}

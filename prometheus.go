@@ -21,25 +21,11 @@ func init() {
 	prometheus.Register(httpDuration)
 }
 
-// NewResponseWriter generates a new response
-func NewResponseWriter(w http.ResponseWriter) *responseWriter {
-	return &responseWriter{w, http.StatusOK}
-}
-
-// WriteHeader generates the header
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
-}
-
-// totalRequests creates the metric via the Prometheus package
-var totalRequests = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "http_requests_total",
-		Help: "Number of get requests.",
-	},
-	[]string{"path"},
-)
+// httpDurationcreates the metric via the Prometheus package
+var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+	Name: "http_response_time_seconds",
+	Help: "Duration of HTTP requests.",
+}, []string{"path"})
 
 //responseStatus creates the metric via the Prometheus package
 var responseStatus = prometheus.NewCounterVec(
@@ -50,11 +36,19 @@ var responseStatus = prometheus.NewCounterVec(
 	[]string{"status"},
 )
 
-// httpDurationcreates the metric via the Prometheus package
-var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-	Name: "http_response_time_seconds",
-	Help: "Duration of HTTP requests.",
-}, []string{"path"})
+// totalRequests creates the metric via the Prometheus package
+var totalRequests = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "http_requests_total",
+		Help: "Number of get requests.",
+	},
+	[]string{"path"},
+)
+
+// NewResponseWriter generates a new response
+func NewResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{w, http.StatusOK}
+}
 
 // prometheusMiddleware increments the metrics
 func prometheusMiddleware(next http.Handler) http.Handler {
@@ -73,4 +67,10 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 
 		timer.ObserveDuration()
 	})
+}
+
+// WriteHeader generates the header
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
 }
