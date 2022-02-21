@@ -109,6 +109,7 @@ func runWEB() {
 	rtr.Path("/prometheus").Handler(promhttp.Handler())
 	rtr.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
 	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
+	rtr.Path("/cake").Handler(http.RedirectHandler("/cake.html", http.StatusMovedPermanently))
 
 	fr := http.FileServer(http.Dir("./proverbs"))
 	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
