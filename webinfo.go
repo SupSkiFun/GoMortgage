@@ -8,6 +8,25 @@ import (
 	"os"
 )
 
+// WebInfo is used for a) Postgres data and b) Marshalling JSON.
+type WebInfo struct {
+	Total_amount           string `json:"total_amount"`
+	Apr                    string `json:"apr"`
+	Paid_thru              string `json:"paid_thru"`
+	Current_balance        string `json:"current_balance"`
+	Principal_paid         string `json:"principal_paid"`
+	Percent_principal_paid string `json:"percent_principal_paid"`
+	Interest_saved         string `json:"interest_saved"`
+	Payment_date           string `json:"payment_date"`
+	Payment                string `json:"payment"`
+	Principal              string `json:"principal"`
+	Interest               string `json:"interest"`
+	Balance                string `json:"balance"`
+	Payment_number         string `json:"payment_number"`
+	Percent_principal      string `json:"percent_principal"`
+	Percent_interest       string `json:"percent_interest"`
+}
+
 // getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 	f := "./templates/layoutWebi.html"
@@ -46,7 +65,7 @@ func getWebiJson(w http.ResponseWriter, r *http.Request) {
 
 // queryWebi queries and returns results from Postgres view web_info.
 func queryWebi() (WebInfo, error) {
-	// view web_info only has one record
+	// pgsql-view web_info only has one record
 	snb := WebInfo{}
 	row := db.QueryRow("SELECT * FROM web_info")
 

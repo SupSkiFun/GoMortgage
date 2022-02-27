@@ -8,6 +8,19 @@ import (
 	"os"
 )
 
+// Amortize is used for a) Postgres data and b) Marshalling JSON.
+type Amortize struct {
+	Payment_date      string `json:"payment_date"`
+	Payment           string `json:"payment"`
+	Principal         string `json:"principal"`
+	Interest          string `json:"interest"`
+	Total_interest    string `json:"total_interest"`
+	Balance           string `json:"balance"`
+	Payment_number    string `json:"payment_number"`
+	Percent_principal string `json:"percent_principal"`
+	Percent_interest  string `json:"percent_interest"`
+}
+
 // getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 	f := "./templates/layoutAmor.html"

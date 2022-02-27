@@ -20,50 +20,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Amortize is used for a) Postgres data and b) Marshalling JSON.
-type Amortize struct {
-	Payment_date      string `json:"payment_date"`
-	Payment           string `json:"payment"`
-	Principal         string `json:"principal"`
-	Interest          string `json:"interest"`
-	Total_interest    string `json:"total_interest"`
-	Balance           string `json:"balance"`
-	Payment_number    string `json:"payment_number"`
-	Percent_principal string `json:"percent_principal"`
-	Percent_interest  string `json:"percent_interest"`
-}
-
 // JSONResponse works with test() to provide a simple JSON response.
 type JSONResponse struct {
 	Status string `json:"status"`
-}
-
-// WebInfo is used for a) Postgres data and b) Marshalling JSON.
-type WebInfo struct {
-	Total_amount           string `json:"total_amount"`
-	Apr                    string `json:"apr"`
-	Paid_thru              string `json:"paid_thru"`
-	Current_balance        string `json:"current_balance"`
-	Principal_paid         string `json:"principal_paid"`
-	Percent_principal_paid string `json:"percent_principal_paid"`
-	Interest_saved         string `json:"interest_saved"`
-	Payment_date           string `json:"payment_date"`
-	Payment                string `json:"payment"`
-	Principal              string `json:"principal"`
-	Interest               string `json:"interest"`
-	Balance                string `json:"balance"`
-	Payment_number         string `json:"payment_number"`
-	Percent_principal      string `json:"percent_principal"`
-	Percent_interest       string `json:"percent_interest"`
 }
 
 var db *sql.DB
 
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	// prometheus.Register(totalRequests)
-	// prometheus.Register(responseStatus)
-	// prometheus.Register(httpDuration)
 }
 
 func main() {
@@ -135,11 +100,14 @@ func runWEB() {
 	time.Sleep(secs)
 	s.Shutdown(context.TODO())
 
-	//  Original Startup is below - may need to revert
-	// err = s.ListenAndServe()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	/*  Original Startup is below - can replace above goroutine / closure
+	    and also the sigs / signal channel portion directly above
+
+			err = s.ListenAndServe()
+			if err != nil {
+				log.Fatal(err)
+			}
+	*/
 }
 
 // test provides a basic JSON response.
