@@ -108,7 +108,6 @@ func runWEB() {
 	rtr.HandleFunc("/amortizejson", getAmorJson)
 	rtr.HandleFunc("/json2", getAmorJson)
 	rtr.HandleFunc("/test", test)
-
 	rtr.Path("/prometheus").Handler(promhttp.Handler())
 	rtr.Path("/webinfo").Handler(http.RedirectHandler("/mortgage", http.StatusMovedPermanently))
 	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
@@ -130,9 +129,8 @@ func runWEB() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
 	sig := <-sigs
-	secs := 3 * time.Second
-	log.Println("Terminating in", secs, ": Received signal", sig)
-	time.Sleep(secs)
+	log.Println("Quitting after signal:", sig)
+	time.Sleep(3 * time.Second)
 	s.Shutdown(context.TODO())
 
 	//  Original Startup is below - may need to revert
