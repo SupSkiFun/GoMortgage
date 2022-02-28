@@ -5,13 +5,12 @@ Metrics are exported to Prometheus.
 package main
 
 import (
-	"context"
+	// "context"
 	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -55,7 +54,7 @@ func connectDB() {
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
-	// var err error	Remove this if I keep using go routines
+	var err error
 	rtr := mux.NewRouter()
 	rtr.Use(prometheusMiddleware)
 	s := &http.Server{
@@ -84,30 +83,10 @@ func runWEB() {
 	fs := http.FileServer(http.Dir("./htdocs"))
 	rtr.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
-	go func() {
-		err := s.ListenAndServe()
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-	}()
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt)
-	sig := <-sigs
-	secs := 3 * time.Second
-	log.Println("Terminating in", secs, ": Received signal", sig)
-	time.Sleep(secs)
-	s.Shutdown(context.TODO())
-
-	/*  Original Startup is below - can replace above goroutine / closure
-	    and also the sigs / signal channel portion directly above
-
-			err = s.ListenAndServe()
-			if err != nil {
-				log.Fatal(err)
-			}
-	*/
+	err = s.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // test provides a basic JSON response.
@@ -117,3 +96,25 @@ func test(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(jsonResponse)
 }
+
+/*
+    Startup using a goroutine and signal catching is below.
+	Elected to stick with basic startup directly above.
+
+		go func() {
+			err := s.ListenAndServe()
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+		}()
+
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, os.Interrupt)
+		sig := <-sigs
+		secs := 3 * time.Second
+		log.Println("Terminating in", secs, ": Received signal", sig)
+		time.Sleep(secs)
+		s.Shutdown(context.TODO())
+
+*/
