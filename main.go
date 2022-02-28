@@ -98,8 +98,8 @@ func test(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-    Startup using a goroutine and signal catching is below.
-	Elected to stick with basic startup directly above.
+    Elected to stick with basic startup directly above.
+	Startup using a goroutine and signal catching is below.
 
 		go func() {
 			err := s.ListenAndServe()
