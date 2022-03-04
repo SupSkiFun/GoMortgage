@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//go:embed htdocs proverbs
+//go:embed htdocs proverbs templates
 var embFS embed.FS
 
 // runWEB registers handlers and starts the web server.
@@ -50,8 +50,13 @@ func runWEB() {
 	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 	rtr.Path("/cake").Handler(http.RedirectHandler("/cake.html", http.StatusMovedPermanently))
 
+	// fr := http.FileServer(http.Dir("./proverbs"))
+	// rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
 	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", http.FileServer(http.FS(prv))))
+	// fs := http.FileServer(http.Dir("./htdocs"))
+	//rtr.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 	rtr.PathPrefix("/").Handler(http.FileServer(http.FS(htd)))
+	//  http.Handle("/", http.FileServer(http.FS(sRoot)))
 
 	err = s.ListenAndServe()
 	if err != nil {
