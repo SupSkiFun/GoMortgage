@@ -7,25 +7,10 @@ package main
 import (
 	// "context"
 	"database/sql"
-	"encoding/json"
 	"log"
-	"net/http"
 
 	_ "github.com/lib/pq"
 )
-
-// JSONResponse works with test() to provide a simple JSON response.
-type JSONResponse struct {
-	Status string `json:"status"`
-}
-
-// test provides a basic JSON response.
-func test(w http.ResponseWriter, r *http.Request) {
-	jsonResponse := JSONResponse{
-		Status: "OK",
-	}
-	json.NewEncoder(w).Encode(jsonResponse)
-}
 
 var db *sql.DB
 
