@@ -19,6 +19,14 @@ type JSONResponse struct {
 	Status string `json:"status"`
 }
 
+// test provides a basic JSON response.
+func test(w http.ResponseWriter, r *http.Request) {
+	jsonResponse := JSONResponse{
+		Status: "OK",
+	}
+	json.NewEncoder(w).Encode(jsonResponse)
+}
+
 var db *sql.DB
 
 func init() {
@@ -28,12 +36,4 @@ func init() {
 func main() {
 	connectDB()
 	runWEB()
-}
-
-// test provides a basic JSON response.
-func test(w http.ResponseWriter, r *http.Request) {
-	jsonResponse := JSONResponse{
-		Status: "OK",
-	}
-	json.NewEncoder(w).Encode(jsonResponse)
 }
