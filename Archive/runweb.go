@@ -1,56 +1,18 @@
-/*
-Mortgage Application produces a container that interacts with postgreSQL.
-Metrics are exported to Prometheus.
-*/
 package main
 
 import (
-	// "context"
-	"database/sql"
-	"encoding/json"
+	"embed"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	_ "github.com/lib/pq"
 )
 
-// JSONResponse works with test() to provide a simple JSON response.
-type JSONResponse struct {
-	Status string `json:"status"`
-}
-
-var db *sql.DB
-
-func init() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-}
-
-func main() {
-	connectDB()
-	runWEB()
-}
-
-// connectDB initializes a connection to Postgres.
-func connectDB() {
-	dbh := os.Getenv("DB_HOST")
-	dbn := os.Getenv("DB_NAME")
-	dbp := os.Getenv("DB_PASS")
-	dbt := os.Getenv("DB_TYPE")
-	dbu := os.Getenv("DB_USER")
-	connStr := dbt + "://" + dbu + ":" + dbp + "@" + dbh + "/" + dbn + "?sslmode=disable"
-	db, _ = sql.Open("postgres", connStr)
-	err := db.Ping()
-	if err != nil {
-		log.Println("error opening database connection: ", err.Error())
-	} else {
-		log.Println("database ping ok")
-	}
-}
+//go:embed htdocs proverbs
+var embFS embed.FS
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
@@ -63,6 +25,16 @@ func runWEB() {
 		ReadTimeout:       3 * time.Second,
 		WriteTimeout:      3 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
+	}
+
+	htd, err := fs.Sub(embFS, "htdocs")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prv, err := fs.Sub(embFS, "proverbs")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	rtr.HandleFunc("/mortgage", getWebiHtml)
@@ -78,23 +50,13 @@ func runWEB() {
 	rtr.Path("/webinfojson").Handler(http.RedirectHandler("/mortgagejson", http.StatusMovedPermanently))
 	rtr.Path("/cake").Handler(http.RedirectHandler("/cake.html", http.StatusMovedPermanently))
 
-	fr := http.FileServer(http.Dir("./proverbs"))
-	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", fr))
-	fs := http.FileServer(http.Dir("./htdocs"))
-	rtr.PathPrefix("/").Handler(http.StripPrefix("/", fs))
+	rtr.PathPrefix("/proverbs/").Handler(http.StripPrefix("/proverbs/", http.FileServer(http.FS(prv))))
+	rtr.PathPrefix("/").Handler(http.FileServer(http.FS(htd)))
 
 	err = s.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// test provides a basic JSON response.
-func test(w http.ResponseWriter, r *http.Request) {
-	jsonResponse := JSONResponse{
-		Status: "OK",
-	}
-	json.NewEncoder(w).Encode(jsonResponse)
 }
 
 /*
@@ -116,5 +78,4 @@ func test(w http.ResponseWriter, r *http.Request) {
 		log.Println("Terminating in", secs, ": Received signal", sig)
 		time.Sleep(secs)
 		s.Shutdown(context.TODO())
-
 */
