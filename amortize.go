@@ -24,7 +24,7 @@ type Amortize struct {
 // getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
-	tmf, err := fs.Sub(emtFS, "templates")
+	tmf, err := fs.Sub(embFS, "templates")
 	if err != nil {
 		log.Println("Error returning embedded directory templates:", err.Error())
 	}

@@ -30,7 +30,7 @@ type WebInfo struct {
 // getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
-	tmf, err := fs.Sub(emtFS, "templates")
+	tmf, err := fs.Sub(embFS, "templates")
 	if err != nil {
 		log.Println("Error returning embedded directory templates:", err.Error())
 	}

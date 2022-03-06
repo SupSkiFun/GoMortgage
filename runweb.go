@@ -11,11 +11,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//go:embed htdocs proverbs
+//go:embed htdocs proverbs templates
 var embFS embed.FS
-
-//go:embed templates
-var emtFS embed.FS
 
 // runWEB registers handlers and starts the web server.
 func runWEB() {
