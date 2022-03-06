@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
 )
 
 // Amortize is used for a) Postgres data and b) Marshalling JSON.
@@ -23,10 +23,17 @@ type Amortize struct {
 
 // getAmorHtml renders HTML from Postgres via queryAmor().
 func getAmorHtml(w http.ResponseWriter, r *http.Request) {
-	f := "./templates/layoutAmor.html"
-	_, err := os.Stat(f)
+
+	tmf, err := fs.Sub(emtFS, "templates")
 	if err != nil {
-		log.Println(f, "not found: ", err.Error())
+		log.Println("Error returning embedded directory templates:", err.Error())
+	}
+
+	f := "layoutAmor.html"
+
+	_, err = fs.ReadFile(tmf, f)
+	if err != nil {
+		log.Println("Error reading", f, err.Error())
 		http.Error(w, "HTML template issue", http.StatusInternalServerError)
 		return
 	}
@@ -38,7 +45,7 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles(f))
+	tmpl := template.Must(template.ParseFS(tmf, f))
 	tmpl.Execute(w, recs) //recs[0])
 }
 

@@ -14,6 +14,9 @@ import (
 //go:embed htdocs proverbs
 var embFS embed.FS
 
+//go:embed templates
+var emtFS embed.FS
+
 // runWEB registers handlers and starts the web server.
 func runWEB() {
 	var err error
@@ -29,12 +32,12 @@ func runWEB() {
 
 	htd, err := fs.Sub(embFS, "htdocs")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error returning embedded directory htdocs:", err.Error())
 	}
 
 	prv, err := fs.Sub(embFS, "proverbs")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error returning embedded directory proverbs:", err.Error())
 	}
 
 	rtr.HandleFunc("/mortgage", getWebiHtml)
