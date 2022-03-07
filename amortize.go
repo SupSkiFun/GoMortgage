@@ -31,6 +31,11 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
 	f := "layoutAmor.html"
 
+	/*
+		Implement this instead of ReadFile?
+		fs.Stat(tmf, f)
+	*/
+
 	_, err = fs.ReadFile(tmf, f)
 	if err != nil {
 		log.Println("Error reading", f, err.Error())

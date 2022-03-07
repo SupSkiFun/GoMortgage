@@ -37,6 +37,11 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 
 	f := "layoutWebi.html"
 
+	/*
+		Implement this instead of ReadFile?
+		fs.Stat(tmf, f)
+	*/
+
 	_, err = fs.ReadFile(tmf, f)
 	if err != nil {
 		log.Println("Error reading", f, err.Error())
