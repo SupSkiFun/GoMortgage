@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//go:embed htdocs proverbs
+//go:embed htdocs proverbs templates
 var embFS embed.FS
 
 // runWEB registers handlers and starts the web server.
@@ -29,12 +29,12 @@ func runWEB() {
 
 	htd, err := fs.Sub(embFS, "htdocs")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error returning embedded directory htdocs:", err.Error())
 	}
 
 	prv, err := fs.Sub(embFS, "proverbs")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error returning embedded directory proverbs:", err.Error())
 	}
 
 	rtr.HandleFunc("/mortgage", getWebiHtml)

@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
 )
 
 // WebInfo is used for a) Postgres data and b) Marshalling JSON.
@@ -29,10 +29,17 @@ type WebInfo struct {
 
 // getWebiHtml renders HTML from Postgres via queryWebi().
 func getWebiHtml(w http.ResponseWriter, r *http.Request) {
-	f := "./templates/layoutWebi.html"
-	_, err := os.Stat(f)
+
+	tmf, err := fs.Sub(embFS, "templates")
 	if err != nil {
-		log.Println(f, "not found: ", err.Error())
+		log.Println("Error returning embedded directory templates:", err.Error())
+	}
+
+	f := "layoutWebi.html"
+
+	_, err = fs.ReadFile(tmf, f)
+	if err != nil {
+		log.Println("Error reading", f, err.Error())
 		http.Error(w, "HTML template issue", http.StatusInternalServerError)
 		return
 	}
@@ -44,7 +51,7 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles(f))
+	tmpl := template.Must(template.ParseFS(tmf, f))
 	tmpl.Execute(w, recs) //recs[0])
 }
 
