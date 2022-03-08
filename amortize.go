@@ -31,14 +31,9 @@ func getAmorHtml(w http.ResponseWriter, r *http.Request) {
 
 	f := "layoutAmor.html"
 
-	/*
-		Implement this instead of ReadFile?
-		fs.Stat(tmf, f)
-	*/
-
-	_, err = fs.ReadFile(tmf, f)
+	_, err = fs.Stat(tmf, f)
 	if err != nil {
-		log.Println("Error reading", f, err.Error())
+		log.Println("Error locating", f, err.Error())
 		http.Error(w, "HTML template issue", http.StatusInternalServerError)
 		return
 	}
