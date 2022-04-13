@@ -59,7 +59,7 @@ func getWebiHtml(w http.ResponseWriter, r *http.Request) {
 func getWebiJson(w http.ResponseWriter, r *http.Request) {
 	recs, err := queryWebi()
 	if err != nil {
-		log.Println("error calling queryAmor(): ", err.Error())
+		log.Println("error calling queryWebi(): ", err.Error())
 		http.Error(w, "Database connection issue", http.StatusServiceUnavailable)
 		return
 	}
